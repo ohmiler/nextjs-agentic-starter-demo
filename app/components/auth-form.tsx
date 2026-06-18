@@ -14,6 +14,7 @@ type Field = {
 
 type AuthFormProps = {
   title: string;
+  subtitle?: string;
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   fields: Field[];
   submitLabel: string;
@@ -24,6 +25,7 @@ const initialState: ActionState = { success: false };
 
 export function AuthForm({
   title,
+  subtitle,
   action,
   fields,
   submitLabel,
@@ -32,11 +34,18 @@ export function AuthForm({
   const [state, formAction] = useActionState(action, initialState);
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-12">
-      <h1 className="mb-6 text-2xl font-semibold">{title}</h1>
-      <form action={formAction} className="flex flex-col gap-4">
+    <div className="mx-auto w-full max-w-md px-5 py-16 sm:py-20">
+      <div className="animate-fade-up">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+          ชมรม dev ยุค ai
+        </p>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight">{title}</h1>
+        {subtitle && <p className="mt-2 text-sm text-muted">{subtitle}</p>}
+      </div>
+
+      <form action={formAction} className="animate-fade-up delay-1 mt-8 flex flex-col gap-5">
         {state.errors?._form && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
             {state.errors._form}
           </p>
         )}
@@ -52,7 +61,10 @@ export function AuthForm({
         ))}
         <SubmitButton label={submitLabel} />
       </form>
-      <div className="mt-4 text-center text-sm text-zinc-600">{footer}</div>
+
+      <div className="animate-fade-in delay-2 mt-6 text-center text-sm text-muted">
+        {footer}
+      </div>
     </div>
   );
 }

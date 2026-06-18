@@ -15,12 +15,13 @@ export default async function LoginPage({
   return (
     <div>
       {params.message && (
-        <p className="mx-auto mt-4 max-w-md rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
+        <p className="mx-auto mt-6 max-w-md rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-200">
           {params.message}
         </p>
       )}
       <AuthForm
         title="เข้าสู่ระบบ"
+        subtitle="ใช้อีเมลและรหัสผ่านที่สมัครไว้"
         action={login}
         fields={[
           { name: "email", label: "อีเมล", type: "email" },
@@ -30,7 +31,10 @@ export default async function LoginPage({
         footer={
           <>
             ยังไม่มีบัญชี?{" "}
-            <Link href="/register" className="font-medium text-zinc-900 underline">
+            <Link
+              href="/register"
+              className="font-medium text-accent underline-offset-4 hover:underline"
+            >
               สมัครสมาชิก
             </Link>
           </>

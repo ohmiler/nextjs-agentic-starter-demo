@@ -4,18 +4,30 @@ export default async function MembersPage() {
   const [members, count] = await Promise.all([getMembers(), getMemberCount()]);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-semibold">สมาชิกชมรม dev ยุค ai</h1>
-      <p className="mt-1 text-sm text-zinc-500">ทั้งหมด {count} คน</p>
-      <ol className="mt-8 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white">
+    <div className="mx-auto w-full max-w-2xl px-5 py-12 sm:py-16">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+        สมาชิก
+      </p>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+        รายชื่อสมาชิก
+      </h1>
+      <p className="mt-1 text-sm text-muted">ทั้งหมด {count} คน</p>
+
+      <ol className="mt-10 divide-y divide-border">
         {members.length === 0 ? (
-          <li className="px-4 py-6 text-center text-zinc-500">
+          <li className="py-8 text-center text-sm text-muted">
             ยังไม่มีสมาชิก
           </li>
         ) : (
           members.map((member, index) => (
-            <li key={`${member.fullName}-${member.createdAt}`} className="px-4 py-3">
-              {index + 1}. {member.fullName}
+            <li
+              key={`${member.fullName}-${member.createdAt}`}
+              className="flex items-baseline gap-4 py-4"
+            >
+              <span className="w-8 shrink-0 font-mono text-xs text-muted">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="text-foreground">{member.fullName}</span>
             </li>
           ))
         )}

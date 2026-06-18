@@ -10,6 +10,7 @@ export default async function RegisterPage() {
   return (
     <AuthForm
       title="สมัครสมาชิก"
+      subtitle="สมัครเสร็จใช้งานได้ทันที"
       action={register}
       fields={[
         { name: "fullName", label: "ชื่อ-นามสกุล" },
@@ -25,7 +26,10 @@ export default async function RegisterPage() {
       footer={
         <>
           มีบัญชีแล้ว?{" "}
-          <Link href="/login" className="font-medium text-zinc-900 underline">
+          <Link
+            href="/login"
+            className="font-medium text-accent underline-offset-4 hover:underline"
+          >
             เข้าสู่ระบบ
           </Link>
         </>

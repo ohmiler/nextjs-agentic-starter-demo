@@ -24,14 +24,17 @@ export function ProfileForms({ fullName, email }: ProfileFormsProps) {
   );
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-12">
-      <h1 className="mb-8 text-2xl font-semibold">โปรไฟล์ของฉัน</h1>
+    <div className="mx-auto w-full max-w-md px-5 py-12 sm:py-16">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+        บัญชี
+      </p>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight">โปรไฟล์</h1>
 
-      <section className="mb-10">
-        <h2 className="mb-4 text-lg font-medium">ข้อมูลส่วนตัว</h2>
-        <form action={profileAction} className="flex flex-col gap-4">
+      <section className="mt-12 border-t border-border pt-10">
+        <h2 className="text-sm font-medium">ข้อมูลส่วนตัว</h2>
+        <form action={profileAction} className="mt-5 flex flex-col gap-5">
           {profileState.success && (
-            <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">
+            <p className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-400">
               บันทึกข้อมูลเรียบร้อยแล้ว
             </p>
           )}
@@ -46,16 +49,16 @@ export function ProfileForms({ fullName, email }: ProfileFormsProps) {
         </form>
       </section>
 
-      <section>
-        <h2 className="mb-4 text-lg font-medium">เปลี่ยนรหัสผ่าน</h2>
-        <form action={passwordAction} className="flex flex-col gap-4">
+      <section className="mt-12 border-t border-border pt-10">
+        <h2 className="text-sm font-medium">เปลี่ยนรหัสผ่าน</h2>
+        <form action={passwordAction} className="mt-5 flex flex-col gap-5">
           {passwordState.success && (
-            <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">
+            <p className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-400">
               เปลี่ยนรหัสผ่านเรียบร้อยแล้ว
             </p>
           )}
           {passwordState.errors?._form && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
               {passwordState.errors._form}
             </p>
           )}
