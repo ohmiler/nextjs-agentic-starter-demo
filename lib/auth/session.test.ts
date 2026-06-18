@@ -1,4 +1,3 @@
-import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTestDb } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
