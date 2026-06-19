@@ -1,0 +1,14 @@
+{
+  "projectId": "proj_dryrun00000001",
+  "type": "frontend",
+  "name": "Home page shows club branding and register CTA",
+  "description": "A visitor on the home page sees the dev club branding and can reach registration from the primary call to action.",
+  "priority": "p0",
+  "planSteps": [
+    { "type": "action", "description": "Open the application home page" },
+    {
+      "type": "assertion",
+      "description": "Verify the page shows the club name or dev/ยุคai branding and a visible primary action to register or sign up"
+    }
+  ]
+}

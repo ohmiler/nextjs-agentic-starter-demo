@@ -1,49 +1,65 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import fs from "fs";
-import path from "path";
+import { createClient, type Client } from "@libsql/client";
+import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
-let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+export type Db = LibSQLDatabase<typeof schema>;
 
-export function getDb() {
-  if (db) return db;
+let db: Db | null = null;
 
-  const dbPath =
-    process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "club.db");
-  const dir = path.dirname(dbPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+function getTursoUrl(): string {
+  return (
+    process.env.TURSO_DATABASE_URL ??
+    process.env.DATABASE_URL ??
+    "file:data/club.db"
+  );
+}
+
+function createTursoClient(): Client {
+  const url = getTursoUrl();
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+
+  if (url.startsWith("libsql:") && !authToken) {
+    throw new Error(
+      "TURSO_AUTH_TOKEN is required when using a remote libsql:// URL",
+    );
   }
 
-  const sqlite = new Database(dbPath);
-  sqlite.pragma("foreign_keys = ON");
-  db = drizzle(sqlite, { schema });
+  return createClient({
+    url,
+    authToken: authToken || undefined,
+  });
+}
+
+export function getDb(): Db {
+  if (db) return db;
+  db = drizzle(createTursoClient(), { schema });
   return db;
 }
 
-/** For tests — in-memory DB */
-export function createTestDb() {
-  const sqlite = new Database(":memory:");
-  sqlite.pragma("foreign_keys = ON");
-  const testDb = drizzle(sqlite, { schema });
+const TEST_SCHEMA_STATEMENTS = [
+  `CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  )`,
+  `CREATE TABLE sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL
+  )`,
+  `CREATE INDEX idx_sessions_user_id ON sessions(user_id)`,
+  `CREATE INDEX idx_sessions_expires_at ON sessions(expires_at)`,
+];
 
-  sqlite.exec(`
-    CREATE TABLE users (
-      id TEXT PRIMARY KEY,
-      full_name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      created_at INTEGER NOT NULL
-    );
-    CREATE TABLE sessions (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      expires_at INTEGER NOT NULL
-    );
-    CREATE INDEX idx_sessions_user_id ON sessions(user_id);
-    CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
-  `);
+/** For tests — in-memory LibSQL */
+export async function createTestDb(): Promise<Db> {
+  const client = createClient({ url: ":memory:" });
 
-  return testDb;
+  for (const statement of TEST_SCHEMA_STATEMENTS) {
+    await client.execute(statement);
+  }
+
+  return drizzle(client, { schema });
 }

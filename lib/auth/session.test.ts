@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { createTestDb } from "@/lib/db";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { createTestDb, type Db } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
 import { hashPassword } from "./password";
 import {
@@ -9,8 +9,12 @@ import {
 } from "./session";
 
 describe("session", () => {
-  const db = createTestDb();
+  let db: Db;
   const userId = "user-1";
+
+  beforeAll(async () => {
+    db = await createTestDb();
+  });
 
   afterEach(async () => {
     await db.delete(sessions);

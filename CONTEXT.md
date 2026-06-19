@@ -20,14 +20,14 @@
 |-------|-----------|
 | Framework | Next.js 16 (App Router) |
 | UI | React 19, Tailwind CSS 4 |
-| Database | SQLite file (`better-sqlite3`) |
+| Database | Turso (LibSQL) via `@libsql/client` |
 | ORM | Drizzle ORM |
 | Auth | Custom session (DB + HTTP-only cookie) |
 | Password | bcrypt (cost 12) |
 | Validation | Zod |
 | Tests | Vitest |
 | Language | TypeScript |
-| Deploy target | Local / VPS (ไม่ใช่ Vercel serverless) |
+| Deploy target | **Vercel** + Turso (remote); local dev ใช้ `file:data/club.db` |
 
 ---
 
@@ -100,9 +100,10 @@ sessions (id, user_id → users.id CASCADE, expires_at)
 ```
 
 - Drizzle schema: `lib/db/schema.ts`
-- Connection: `lib/db/index.ts` — `getDb()` singleton, `createTestDb()` สำหรับ test (in-memory)
+- Connection: `lib/db/index.ts` — `getDb()` singleton (LibSQL), `createTestDb()` สำหรับ test (in-memory)
 - Migration: `drizzle/` + `npm run db:generate` / `db:migrate`
-- DB file: `data/club.db` (gitignored)
+- Local file fallback: `TURSO_DATABASE_URL=file:data/club.db`
+- Production: `TURSO_DATABASE_URL=libsql://...` + `TURSO_AUTH_TOKEN`
 
 ---
 
@@ -144,12 +145,56 @@ docs/superpowers/
 ## Environment Variables
 
 ```env
-DATABASE_PATH=./data/club.db
+TURSO_DATABASE_URL=file:data/club.db          # local
+# TURSO_DATABASE_URL=libsql://xxx.turso.io   # production (Turso)
+TURSO_AUTH_TOKEN=                             # required for libsql:// remote
 SESSION_SECRET=<random-hex-64-chars>
 ```
 
 - Template: `.env.example`
 - Local: `.env.local` (gitignored)
+- Vercel: ตั้ง env vars ใน Project Settings → Environment Variables
+
+---
+
+## Deploy (Vercel + Turso)
+
+### 1. สร้าง Turso database
+
+```bash
+# ติดตั้ง Turso CLI: https://docs.turso.tech/cli
+turso auth login
+turso db create dev-yuk-ai-club
+turso db show dev-yuk-ai-club --url
+turso db tokens create dev-yuk-ai-club
+```
+
+### 2. Migrate schema ไป Turso
+
+```bash
+# ตั้ง env ชั่วคราว (PowerShell)
+$env:TURSO_DATABASE_URL = "libsql://..."
+$env:TURSO_AUTH_TOKEN = "..."
+npm run db:migrate
+```
+
+### 3. Deploy บน Vercel
+
+```bash
+npx vercel link
+npx vercel env add TURSO_DATABASE_URL
+npx vercel env add TURSO_AUTH_TOKEN
+npx vercel env add SESSION_SECRET
+npx vercel deploy --prod
+```
+
+หรือ connect GitHub repo ใน Vercel Dashboard แล้วตั้ง env vars ด้านบน
+
+### หมายเหตุ
+
+- ใช้ `@libsql/client` (HTTP) — ทำงานบน Vercel serverless ได้
+- **อย่า** ใช้ `better-sqlite3` หรือ SQLite file บน Vercel
+- `SESSION_SECRET` ต้องตั้งใน production (`Secure` cookie)
 
 ---
 
@@ -174,7 +219,7 @@ npm run db:studio    # Drizzle Studio
 | 2026-06-18 | SQLite file บน local/VPS | ตั้งง่าย, เหมาะชมรมเล็ก |
 | 2026-06-18 | สมัครแล้วใช้ได้ทันที | ลด complexity v1 |
 | 2026-06-18 | รายชื่อสมาชิก public (ชื่อเท่านั้น) | โปรโมทชมรมได้, ไม่ leak email |
-| 2026-06-18 | `proxy.ts` แทน `middleware.ts` | Next.js 16 convention |
+| 2026-06-19 | Turso (LibSQL) แทน better-sqlite3 | รองรับ Vercel serverless deploy |
 
 ---
 

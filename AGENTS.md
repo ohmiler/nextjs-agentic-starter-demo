@@ -16,8 +16,8 @@ Rules สำหรับ AI agents ที่ทำงานใน repo นี้
 
 Membership web app สำหรับ **ชมรม dev ยุค ai**: register/login, profile, public member directory.
 
-- **Stack:** Next.js 16 · React 19 · SQLite · Drizzle · custom session auth · Zod · Vitest · Tailwind 4
-- **Deploy:** local/VPS only — SQLite file (`data/club.db`), ไม่ target Vercel serverless
+- **Stack:** Next.js 16 · React 19 · Turso (LibSQL) · Drizzle · custom session auth · Zod · Vitest · Tailwind 4
+- **Deploy:** Vercel + Turso remote DB; local dev ใช้ `file:data/club.db`
 - **UI:** ภาษาไทย · dark theme · accent cyan — ดู `app/globals.css`
 
 ---
@@ -38,7 +38,7 @@ Membership web app สำหรับ **ชมรม dev ยุค ai**: registe
 | **Proxy scope** | ตรวจ cookie เท่านั้น — ไม่ query DB ใน proxy |
 | **Session validation** | `(protected)/layout.tsx` + `getCurrentUser()` |
 | **Mutations** | Server Actions ใน `app/actions/` — ไม่สร้าง REST API แยก unless จำเป็น |
-| **Database** | Drizzle ORM + `getDb()` — schema ใน `lib/db/schema.ts` |
+| **Database** | Drizzle ORM + `getDb()` — Turso/LibSQL via `@libsql/client` |
 | **Auth** | Custom session (ไม่ใช้ Auth.js) — helpers ใน `lib/auth/` |
 | **Validation** | Zod ใน `lib/validations/` — error messages **ภาษาไทย** |
 | **Passwords** | bcrypt ผ่าน `lib/auth/password.ts` — ไม่เก็บ plain text |
@@ -69,7 +69,7 @@ proxy.ts           Route guard (root level)
 
 1. แก้ `lib/db/schema.ts`
 2. `npm run db:generate`
-3. สร้าง `data/` ถ้ายังไม่มี แล้ว `npm run db:migrate`
+3. `npm run db:migrate` (remote ต้องมี `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`)
 4. อัปเดต `createTestDb()` ใน `lib/db/index.ts` ถ้า schema เปลี่ยน
 
 ---
@@ -106,7 +106,7 @@ proxy.ts           Route guard (root level)
 
 - ใช้ `middleware.ts` (deprecated ใน Next.js 16 — ใช้ `proxy.ts`)
 - ใส่ Auth.js / NextAuth unless user ขอเปลี่ยน architecture
-- Deploy config สำหรับ Vercel/serverless SQLite
+- ใช้ `better-sqlite3` หรือ SQLite file บน Vercel (ใช้ Turso/LibSQL แทน)
 - สร้าง feature นอก scope โดยไม่ brainstorm/spec ก่อน (ดู roadmap ใน `CONTEXT.md`)
 - Over-engineer — YAGNI, minimal diff, match existing style
 

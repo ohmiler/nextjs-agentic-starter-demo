@@ -1,13 +1,10 @@
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import * as schema from "@/lib/db/schema";
+import type { Db } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
 import { getDb } from "@/lib/db";
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS } from "./constants";
-
-type Db = BetterSQLite3Database<typeof schema>;
 
 function generateSessionId(): string {
   return randomBytes(32).toString("hex");
